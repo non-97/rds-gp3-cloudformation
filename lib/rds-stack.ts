@@ -7,7 +7,7 @@ export class RdsStack extends cdk.Stack {
 
     // VPC
     const vpc = new cdk.aws_ec2.Vpc(this, "VPC", {
-      cidr: "10.0.1.0/24",
+      ipAddresses: cdk.aws_ec2.IpAddresses.cidr("10.0.1.0/24"),
       enableDnsHostnames: true,
       enableDnsSupport: true,
       natGateways: 0,
@@ -45,7 +45,7 @@ export class RdsStack extends cdk.Stack {
           version: cdk.aws_rds.PostgresEngineVersion.VER_14_4,
         }),
         vpc,
-        allocatedStorage: 20,
+        allocatedStorage: 400,
         availabilityZone: vpc.availabilityZones[0],
         backupRetention: cdk.Duration.days(0),
         instanceIdentifier: "rds-db-instance",
@@ -54,7 +54,7 @@ export class RdsStack extends cdk.Stack {
           cdk.aws_ec2.InstanceSize.MICRO
         ),
         multiAz: false,
-        port: 3306,
+        port: 5432,
         publiclyAccessible: false,
         storageEncrypted: true,
         storageType: cdk.aws_rds.StorageType.GP2,
@@ -67,5 +67,11 @@ export class RdsStack extends cdk.Stack {
       .defaultChild as cdk.aws_rds.CfnDBInstance;
 
     cfnDbInstance.addPropertyOverride("StorageType", "gp3");
+
+    // Storage Throughput
+    cfnDbInstance.addPropertyOverride("StorageThroughput", "600");
+
+    // IOPS
+    cfnDbInstance.addPropertyOverride("Iops", "15000");
   }
 }
